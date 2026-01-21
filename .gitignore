@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+.env
+
+# FAISS index & generated files
+faiss_index_pdfs/
+
+# PDF files (optional – remove if you want to upload PDFs)
+pdfs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+.vscode/
+__pycache__/
