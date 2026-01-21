@@ -87,7 +87,20 @@ GROQ_API_KEY=your_groq_api_key_here
 
 ---
 
-### 5. Run the Project
+### 5. Groq API Key Setup
+
+This project uses Groq LLM. You must provide your own API key.
+
+1. Get an API key from:
+   https://console.groq.com/keys
+
+2. Create a `.env` file in the project root:
+   ```env
+   GROQ_API_KEY=your_api_key_here
+
+---
+
+### 6. Run the Project
 
 ```bash
 jupyter notebook
