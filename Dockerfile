@@ -15,7 +15,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ src/
 COPY tests/ tests/
 COPY app.py .
-COPY config.py .
 
 # Create directories
 RUN mkdir -p pdfs faiss_index logs
