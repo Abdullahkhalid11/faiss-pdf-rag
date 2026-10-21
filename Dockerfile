@@ -7,22 +7,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements and install
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY src/ src/
+COPY tests/ tests/
 COPY app.py .
-COPY .env .env
+COPY config.py .
 
-# Create pdfs and faiss_index directories
-RUN mkdir -p pdfs faiss_index
+# Create directories
+RUN mkdir -p pdfs faiss_index logs
 
-# Expose port
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+
+# Environment (will be overridden on Render)
+ENV ENVIRONMENT=production
+ENV PORT=8000
+
 EXPOSE 8000
 
-# Run FastAPI server
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run with single worker for Render free tier
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
