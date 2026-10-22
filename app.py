@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.ingest import ingest
 from src.retrieve import RAGChain
@@ -17,6 +18,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="FAISS PDF RAG", version="1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (dev only)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize RAG chain
 rag_chain = None
