@@ -12,19 +12,24 @@ from src.ingest import ingest
 from src.retrieve import RAGChain
 from src.config import INDEX_DIR
 from src.auth import verify_api_key
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+import uvicorn
 
 app = FastAPI(title="FAISS PDF RAG", version="1.0")
+
+# ADD THIS CORS CONFIGURATION
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (dev only)
+    allow_origins=["*"],  # Allow all origins (for demo; restrict in production)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize RAG chain
 rag_chain = None
