@@ -25,7 +25,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# Add explicit CORS preflight handlers
+@app.options("/upload")
+@app.options("/chat")
+async def preflight():
+    """Handle CORS preflight requests."""
+    return {}
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
