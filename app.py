@@ -23,15 +23,11 @@ app = FastAPI(title="FAISS PDF RAG", version="1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.options("/upload")
-@app.options("/chat")
-@app.options("/health")
-async def preflight():
-    return {}
+
 
 # Initialize RAG chain
 rag_chain = None
