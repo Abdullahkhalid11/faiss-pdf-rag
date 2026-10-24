@@ -10,6 +10,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
 
 from src.config import CHUNK_SIZE, CHUNK_OVERLAP, EMBED_MODEL, INDEX_DIR
 
@@ -45,7 +46,7 @@ def chunk_docs(docs: list) -> list:
 def build_index(chunks: list, index_dir: str) -> FAISS:
     index_dir = Path(index_dir)
     index_dir.mkdir(parents=True, exist_ok=True)
-    embeddings = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", model_kwargs={"device": "cpu"})
     store = FAISS.from_documents(chunks, embeddings)
     store.save_local(str(index_dir))
     print(f"FAISS index saved to {index_dir} ({store.index.ntotal} vectors)")
