@@ -1,25 +1,29 @@
 """
 app.py — FastAPI server for RAG service.
 """
-import os
 import logging
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
+from pydantic import BaseModel
 
 from src.ingest import ingest
 from src.retrieve import RAGChain
 from src.config import INDEX_DIR
 from src.auth import verify_api_key
-import uvicorn
 
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Initialize FastAPI app
 app = FastAPI(title="FAISS PDF RAG", version="1.0")
 
-# ADD THIS CORS CONFIGURATION
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (for demo; restrict in production)
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,13 +32,17 @@ app.add_middleware(
 # Add explicit CORS preflight handlers
 @app.options("/upload")
 @app.options("/chat")
+@app.options("/health")
 async def preflight():
     """Handle CORS preflight requests."""
-    return {}
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
+        }
+    )
 
 # Initialize RAG chain
 rag_chain = None
@@ -60,11 +68,17 @@ class QueryResponse(BaseModel):
 async def health():
     """Health check endpoint."""
     index_exists = Path(INDEX_DIR).exists()
-    return {
-        "status": "ok",
-        "index_ready": index_exists,
-        "index_path": str(INDEX_DIR)
-    }
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "ok",
+            "index_ready": index_exists,
+            "index_path": str(INDEX_DIR)
+        },
+        headers={
+            "Access-Control-Allow-Origin": "*",
+        }
+    )
 
 @app.post("/upload")
 async def upload_pdfs(
@@ -100,11 +114,19 @@ async def upload_pdfs(
         rag_chain = None
         logger.info(f"Index rebuilt - {uploaded_count} PDFs processed")
         
-        return {
-            "status": "success",
-            "files_uploaded": uploaded_count,
-            "message": f"Uploaded {uploaded_count} PDF(s) and rebuilt FAISS index"
-        }
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "files_uploaded": uploaded_count,
+                "message": f"Uploaded {uploaded_count} PDF(s) and rebuilt FAISS index"
+            },
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
+            }
+        )
     except Exception as e:
         logger.error(f"Ingestion failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
